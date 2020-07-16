@@ -30,57 +30,44 @@ variables:
   angularWorkingDirectory: '$(System.DefaultWorkingDirectory)/AzureWeb'
 
 stages:
-- stage: Build
-  displayName: Build stage
-
+- stage: __default
   jobs:
-  - job: Build
-    displayName: Build
+  - job: Job
     pool:
-      vmImage: $(vmImageName)
-
+      vmImage: windows-latest
     steps:
-    - task: DotNetCoreCLI@2
-      displayName: Build
+    - task: NodeTool@0
       inputs:
-        command: 'build'
-        projects: |
-          $(functionAppworkingDirectory)/*.csproj
-        arguments: --output $(functionAppworkingDirectory)/publish_output --configuration Release
-
-    - task: ArchiveFiles@2
-      displayName: 'Archive files'
+        versionSpec: 10.x
+      displayName: Install Node.js
+    - task: CmdLine@2
+      displayName: npm install -g @angular/cli
       inputs:
-        rootFolderOrFile: '$(functionAppworkingDirectory)/publish_output'
-        includeRootFolder: false
-        archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-        replaceExistingArchive: true
-
-    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-      artifact: drop
-
-- stage: Deploy
-  displayName: Deploy stage
-  dependsOn: Build
-  condition: succeeded()
-
-  jobs:
-  - deployment: Deploy
-    displayName: Deploy
-    environment: 'development'
-    pool:
-      vmImage: $(vmImageName)
-
-    strategy:
-      runOnce:
-        deploy:
-
-          steps:
-          - task: AzureFunctionApp@1
-            displayName: 'Azure functions app deploy'
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              appType: functionApp
-              appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+        script: >
+          npm install -g @angular/cli
+    - task: CmdLine@2
+      displayName: npm install
+      inputs:
+        script: >
+          npm install
+        workingDirectory: $(angularWorkingDirectory)
+    - task: CmdLine@2
+      displayName: ng build --prod
+      inputs:
+        script: >
+          npm run build
+          workingDirectory: $(angularWorkingDirectory)
+    - task: CmdLine@2
+      displayName: list cwd contents (verify build)
+      inputs:
+        script: >
+          dir
+          workingDirectory: $(angularWorkingDirectory)
+    - task: AzureFileCopy@3
+      inputs:
+        SourcePath: $(angularWorkingDirectory)/dist
+        azureSubscription: $(azureSubscription)
+        Destination: AzureBlob
+        storage: $(storage)
+        ContainerName: $(ContainerName)
+        cleanTargetBeforeCopy: true
