@@ -86,7 +86,7 @@ stages:
               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
 
               
-- stage: __default
+- stage: Angular
   jobs:
   - job: Job
     pool:
