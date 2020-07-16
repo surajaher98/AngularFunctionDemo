@@ -23,10 +23,10 @@ variables:
   # Agent VM image name
   vmImageName: 'windows-latest'
 
-  # Working Directory
+  # Working Directory for function app
   functionAppworkingDirectory: '$(System.DefaultWorkingDirectory)/FunctionApp1'
 
-  # Working Directory
+  # Working Directory for Angular
   angularWorkingDirectory: '$(System.DefaultWorkingDirectory)/AzureWeb'
 
 stages:
@@ -56,7 +56,7 @@ stages:
       inputs:
         script: >
           ng build --prod
-          workingDirectory: $(angularWorkingDirectory)
+        workingDirectory: $(angularWorkingDirectory)
     - task: CmdLine@2
       displayName: list cwd contents (verify build)
       inputs:
