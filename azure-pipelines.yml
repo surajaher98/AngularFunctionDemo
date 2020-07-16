@@ -62,7 +62,7 @@ stages:
       inputs:
         script: >
           dir
-          workingDirectory: $(angularWorkingDirectory)
+        workingDirectory: $(angularWorkingDirectory)
     - task: AzureFileCopy@3
       inputs:
         SourcePath: $(angularWorkingDirectory)/dist
