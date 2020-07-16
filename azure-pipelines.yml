@@ -55,7 +55,7 @@ stages:
       displayName: ng build --prod
       inputs:
         script: >
-          npm run build
+          ng build --prod
           workingDirectory: $(angularWorkingDirectory)
     - task: CmdLine@2
       displayName: list cwd contents (verify build)
